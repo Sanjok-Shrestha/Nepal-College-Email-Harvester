@@ -78,7 +78,7 @@ Make sure you have Node.js and npm installed on your machine.
 
 3. **Navigate to the Project Directory**
    ```sh
-   cd nepal-college-email-harvester
+   cd Nepal-College-Email-Harvester
    ```
 
 4. **Install NPM packages**
