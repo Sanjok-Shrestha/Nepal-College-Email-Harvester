@@ -10,6 +10,9 @@ import SelectInput from './components/SelectInput';
 import CollegeCard from './components/CollegeCard';
 import Spinner from './components/Spinner';
 import SkeletonCard from './components/SkeletonCard';
+import Footer from './components/Footer';
+
+import { useDebounce } from './hooks/useDebounce';
 
 // An array of messages to display during the loading process.
 const LOADING_MESSAGES = [
@@ -48,6 +51,7 @@ const App: React.FC = () => {
   const [searchPerformed, setSearchPerformed] = useState(false);
   // State for the currently displayed loading message.
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
+  const debouncedApiKey = useDebounce(apiKey, 500); // 500ms delay
 
   // useEffect hook to persist the selected province in localStorage.
   useEffect(() => {
@@ -90,6 +94,11 @@ const App: React.FC = () => {
       setError('Please select both a province and a university.');
       return;
     }
+
+    // Create a unique key for caching based on the search criteria.
+    const cacheKey = `harvest_${province}_${university}_${faculty}`;
+    const cachedData = localStorage.getItem(cacheKey);
+
     // Reset state for a new search.
     setError(null);
     setIsLoading(true);
@@ -97,9 +106,18 @@ const App: React.FC = () => {
     setColleges([]);
     setSources([]);
 
+    // If cached data exists, use it instead of calling the API.
+    if (cachedData) {
+      const { colleges: cachedColleges, sources: cachedSources } = JSON.parse(cachedData);
+      setColleges(cachedColleges);
+      setSources(cachedSources);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Use the provided API key or fallback to an environment variable.
-      const finalApiKey = apiKey.trim() || import.meta.env.VITE_GEMINI_API_KEY;
+      const finalApiKey = debouncedApiKey.trim() || import.meta.env.VITE_GEMINI_API_KEY;
       if (!finalApiKey) {
           throw new Error('API Key is required. Please enter one or ensure it is set as an environment variable.');
       }
@@ -107,12 +125,16 @@ const App: React.FC = () => {
       const { colleges: results, sources: foundSources } = await harvestEmails(province, university, faculty, finalApiKey);
       setColleges(results);
       setSources(foundSources);
+
+      // Cache the new results in localStorage.
+      localStorage.setItem(cacheKey, JSON.stringify({ colleges: results, sources: foundSources }));
+
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred.');
     } finally {
       setIsLoading(false);
     }
-  }, [province, university, faculty, apiKey]);
+  }, [province, university, faculty, debouncedApiKey]);
   
   /**
    * Handles the download of the harvested college data as a CSV file.
@@ -120,14 +142,19 @@ const App: React.FC = () => {
   const handleDownloadCSV = () => {
     if (colleges.length === 0) return;
 
+    // Find the maximum number of emails for any college to create dynamic headers.
+    const maxEmails = Math.max(...colleges.map(c => c.emails.length), 0);
+    const emailHeaders = Array.from({ length: maxEmails }, (_, i) => `Email ${i + 1}`);
+
     // Define CSV headers.
-    const headers = ['Name', 'Email 1', 'Email 2'];
+    const headers = ['Name', 'Province', 'University', 'Faculty', ...emailHeaders];
+    
     // Convert college data to CSV rows.
     const rows = colleges.map(college => {
-        const name = `"${college.name.replace(/"/g, '""')}"` // Handle quotes in names.
-        const email1 = college.emails[0] ? `"${college.emails[0]}"` : '';
-        const email2 = college.emails[1] ? `"${college.emails[1]}"` : '';
-        return [name, email1, email2].join(',');
+        const name = `"${college.name.replace(/"/g, '""')}"`; // Handle quotes in names.
+        const row = [name, province, university, faculty || 'N/A'];
+        const emails = college.emails.map(email => `"${email}"`);
+        return [...row, ...emails].join(',');
     });
 
     // Combine headers and rows to create the full CSV content.
@@ -284,6 +311,7 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
