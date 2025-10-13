@@ -1,3 +1,5 @@
+
+// Import necessary React hooks and components, type definitions, and services.
 import React, { useState, useCallback, useEffect } from 'react';
 import { PROVINCES, UNIVERSITIES, FACULTIES } from './constants';
 import { College, GroundingChunk } from './types';
@@ -9,60 +11,86 @@ import CollegeCard from './components/CollegeCard';
 import Spinner from './components/Spinner';
 import SkeletonCard from './components/SkeletonCard';
 
+// An array of messages to display during the loading process.
 const LOADING_MESSAGES = [
-  'Initializing Gemini AI model...',
-  'Crafting the perfect search query...',
-  'Activating Google Search grounding for fresh data...',
-  'Scanning digital archives and official websites...',
-  'Cross-referencing university affiliation lists...',
-  'Searching Google Maps for contact information...',
-  'Compiling and formatting the results...',
-  'Almost there! Just polishing the final list.',
+  'Initializing Gemini AI model...', 
+  'Crafting the perfect search query...', 
+  'Activating Google Search grounding for fresh data...', 
+  'Scanning digital archives and official websites...', 
+  'Cross-referencing university affiliation lists...', 
+  'Searching Google Maps for contact information...', 
+  'Compiling and formatting the results...', 
+  'Almost there! Just polishing the final list.', 
 ];
 
+/**
+ * The main App component.
+ * This component manages the application's state, user inputs, and API interactions.
+ */
 const App: React.FC = () => {
+  // State for the user-provided Gemini API key.
   const [apiKey, setApiKey] = useState('');
+  // State for the selected province, initialized from localStorage.
   const [province, setProvince] = useState(() => localStorage.getItem('selectedProvince') || '');
+  // State for the selected university, initialized from localStorage.
   const [university, setUniversity] = useState(() => localStorage.getItem('selectedUniversity') || '');
+  // State for the selected faculty, initialized from localStorage.
   const [faculty, setFaculty] = useState(() => localStorage.getItem('selectedFaculty') || '');
+  // State to store the harvested college data.
   const [colleges, setColleges] = useState<College[]>([]);
+  // State to store the data sources returned by the Gemini API.
   const [sources, setSources] = useState<GroundingChunk[]>([]);
+  // State to manage the loading status of the API call.
   const [isLoading, setIsLoading] = useState(false);
+  // State to store any error messages.
   const [error, setError] = useState<string | null>(null);
+  // State to track if a search has been performed.
   const [searchPerformed, setSearchPerformed] = useState(false);
+  // State for the currently displayed loading message.
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
 
+  // useEffect hook to persist the selected province in localStorage.
   useEffect(() => {
     localStorage.setItem('selectedProvince', province);
   }, [province]);
 
+  // useEffect hook to persist the selected university in localStorage.
   useEffect(() => {
     localStorage.setItem('selectedUniversity', university);
   }, [university]);
 
+  // useEffect hook to persist the selected faculty in localStorage.
   useEffect(() => {
     localStorage.setItem('selectedFaculty', faculty);
   }, [faculty]);
 
+  // useEffect hook to cycle through loading messages when isLoading is true.
   useEffect(() => {
     if (isLoading) {
-      setLoadingMessage(LOADING_MESSAGES[0]); // Reset to first message on new search
+      setLoadingMessage(LOADING_MESSAGES[0]); // Reset to the first message on a new search.
       const interval = setInterval(() => {
         setLoadingMessage(prev => {
           const currentIndex = LOADING_MESSAGES.indexOf(prev);
           const nextIndex = (currentIndex + 1) % LOADING_MESSAGES.length;
           return LOADING_MESSAGES[nextIndex];
         });
-      }, 2000); // Change message every 2 seconds
-      return () => clearInterval(interval);
+      }, 2000); // Change message every 2 seconds.
+      return () => clearInterval(interval); // Cleanup the interval on component unmount or when isLoading becomes false.
     }
   }, [isLoading]);
 
+  /**
+   * Handles the email harvesting process.
+   * This function is called when the user clicks the "Harvest Emails" button.
+   * It validates the inputs, calls the Gemini API, and updates the state with the results.
+   */
   const handleHarvest = useCallback(async () => {
+    // Validate that a province and university are selected.
     if (!province || !university) {
       setError('Please select both a province and a university.');
       return;
     }
+    // Reset state for a new search.
     setError(null);
     setIsLoading(true);
     setSearchPerformed(true);
@@ -70,10 +98,12 @@ const App: React.FC = () => {
     setSources([]);
 
     try {
-      const finalApiKey = apiKey.trim() || process.env.API_KEY;
+      // Use the provided API key or fallback to an environment variable.
+      const finalApiKey = apiKey.trim() || import.meta.env.VITE_GEMINI_API_KEY;
       if (!finalApiKey) {
           throw new Error('API Key is required. Please enter one or ensure it is set as an environment variable.');
       }
+      // Call the harvestEmails service function.
       const { colleges: results, sources: foundSources } = await harvestEmails(province, university, faculty, finalApiKey);
       setColleges(results);
       setSources(foundSources);
@@ -84,26 +114,36 @@ const App: React.FC = () => {
     }
   }, [province, university, faculty, apiKey]);
   
+  /**
+   * Handles the download of the harvested college data as a CSV file.
+   */
   const handleDownloadCSV = () => {
     if (colleges.length === 0) return;
 
+    // Define CSV headers.
     const headers = ['Name', 'Email 1', 'Email 2'];
+    // Convert college data to CSV rows.
     const rows = colleges.map(college => {
-        const name = `"${college.name.replace(/"/g, '""')}"`; // Handle quotes in names
+        const name = `"${college.name.replace(/"/g, '""')}"` // Handle quotes in names.
         const email1 = college.emails[0] ? `"${college.emails[0]}"` : '';
         const email2 = college.emails[1] ? `"${college.emails[1]}"` : '';
         return [name, email1, email2].join(',');
     });
 
+    // Combine headers and rows to create the full CSV content.
     const csvContent = [headers.join(','), ...rows].join('\n');
+    // Create a Blob from the CSV content.
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Create a link element to trigger the download.
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.href = url;
+    // Generate a filename based on the search criteria.
     const filenameSafeUniversity = university.replace(/\s+/g, '-').toLowerCase();
     const filenameSafeProvince = province.replace(/\s+/g, '-').toLowerCase();
     const filenameSafeFaculty = faculty ? `-${faculty.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}` : '';
     link.setAttribute('download', `nepal-colleges-${filenameSafeProvince}-${filenameSafeUniversity}${filenameSafeFaculty}.csv`);
+    // Trigger the download and cleanup.
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -115,6 +155,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
       <Header />
       <main className="container mx-auto p-4 md:p-8">
+        {/* Search criteria section */}
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <SelectInput
@@ -160,9 +201,12 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* Results section */}
         <div className="mt-8">
+          {/* Display error message if any */}
           {error && <p className="text-center text-red-500 bg-red-100 dark:bg-red-900/50 p-4 rounded-lg">{error}</p>}
           
+          {/* Display loading skeletons and messages while fetching data */}
           {isLoading && (
              <div>
                 <div className="text-center p-4 mb-4">
@@ -177,6 +221,7 @@ const App: React.FC = () => {
              </div>
           )}
 
+          {/* Display results when data is successfully fetched */}
           {!isLoading && searchPerformed && colleges.length > 0 && (
             <>
               <div className="flex justify-between items-center mb-6">
@@ -196,6 +241,7 @@ const App: React.FC = () => {
                   <CollegeCard key={`${college.name}-${index}`} college={college} />
                 ))}
               </div>
+              {/* Display data sources if available */}
               {sources.length > 0 && (
                 <div className="mt-12">
                   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Data Sources</h3>
@@ -215,6 +261,7 @@ const App: React.FC = () => {
             </>
           )}
 
+          {/* Initial state message before any search is performed */}
           {!isLoading && !error && !searchPerformed && (
             <div className="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -225,6 +272,7 @@ const App: React.FC = () => {
             </div>
           )}
 
+          {/* Message to display when no results are found */}
           {!isLoading && !error && searchPerformed && colleges.length === 0 && (
              <div className="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
