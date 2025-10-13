@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <p>
           An Open Source Initiative by{" "}
           <a
-            href="https://gurkhatechnology.com/"
+            href="https://gurkhatech.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-indigo-600 dark:text-indigo-400 hover:underline"

@@ -20,14 +20,14 @@ There are many ways to contribute to this project. Here are a few ideas:
 
 ### Finding an Issue to Work On
 
-You can find a list of open issues [here](https://github.com/arjun-kc/nepal-college-email-harvester/issues). We recommend starting with issues labeled `good first issue` if you are new to the project.
+You can find a list of open issues [here](https://github.com/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester/issues). We recommend starting with issues labeled `good first issue` if you are new to the project.
 
 ## 🚀 Getting Started with Development
 
 1. **Fork and Clone:** Fork the repository and clone it to your local machine.
    ```sh
-   git clone https://github.com/YOUR_USERNAME/nepal-college-email-harvester.git
-   cd nepal-college-email-harvester
+   git clone https://github.com/YOUR_USERNAME/Nepal-College-Email-Harvester.git
+   cd Nepal-College-Email-Harvester
    ```
 
 2. **Install Dependencies:**
