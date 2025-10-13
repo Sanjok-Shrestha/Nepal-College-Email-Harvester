@@ -1,0 +1,5 @@
+{
+  "name": "Nepal College Email Harvester",
+  "description": "An application to find email addresses of colleges in Nepal using the Gemini API, with filtering options for province and affiliated university.",
+  "requestFramePermissions": []
+}
