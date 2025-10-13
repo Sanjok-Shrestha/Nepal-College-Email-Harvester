@@ -12,6 +12,7 @@ import Spinner from './components/Spinner';
 import SkeletonCard from './components/SkeletonCard';
 import Footer from './components/Footer';
 
+import { useTheme } from './hooks/useTheme';
 import { useDebounce } from './hooks/useDebounce';
 
 // An array of messages to display during the loading process.
@@ -31,6 +32,7 @@ const LOADING_MESSAGES = [
  * This component manages the application's state, user inputs, and API interactions.
  */
 const App: React.FC = () => {
+  const [theme, toggleTheme] = useTheme();
   // State for the user-provided Gemini API key.
   const [apiKey, setApiKey] = useState('');
   // State for the selected province, initialized from localStorage.
@@ -178,9 +180,18 @@ const App: React.FC = () => {
   };
 
 
+  const handleClearCache = () => {
+    localStorage.clear();
+    setColleges([]);
+    setSources([]);
+    setSearchPerformed(false);
+    setError(null);
+  };
+
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
-      <Header />
+    <div className={`min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans ${theme}`}>
+      <Header theme={theme} toggleTheme={toggleTheme} />
       <main className="container mx-auto p-4 md:p-8">
         {/* Search criteria section */}
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
@@ -210,7 +221,7 @@ const App: React.FC = () => {
           <div className="mb-6">
             <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} />
           </div>
-          <div className="flex justify-center">
+          <div className="flex justify-center space-x-4">
             <button
               onClick={handleHarvest}
               disabled={isLoading}
@@ -224,6 +235,12 @@ const App: React.FC = () => {
               ) : (
                 'Harvest Emails'
               )}
+            </button>
+            <button
+              onClick={handleClearCache}
+              className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105"
+            >
+              Clear Cache
             </button>
           </div>
         </div>

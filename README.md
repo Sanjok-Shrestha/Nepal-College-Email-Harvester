@@ -9,16 +9,16 @@
   <a href="https://nepal-college-email-harvester.vercel.app/" target="_blank"><strong>View Demo »</strong></a>
   <br />
   <br />
-  <a href="https://github.com/arjun-kc/nepal-college-email-harvester/issues/new?assignees=&labels=bug&template=bug_report.md&title=">Report Bug</a>
+  <a href="https://github.com/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester/issues/new?assignees=&labels=bug&template=bug_report.md&title=">Report Bug</a>
   ·
-  <a href="https://github.com/arjun-kc/nepal-college-email-harvester/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=">Request Feature</a>
+  <a href="https://github.com/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=">Request Feature</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/arjun-kc/nepal-college-email-harvester?style=for-the-badge" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/forks/arjun-kc/nepal-college-email-harvester?style=for-the-badge" alt="GitHub Forks">
-  <img src="https://img.shields.io/github/issues/arjun-kc/nepal-college-email-harvester?style=for-the-badge" alt="GitHub Issues">
-  <img src="https://img.shields.io/github/license/arjun-kc/nepal-college-email-harvester?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/stars/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester?style=for-the-badge" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/forks/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester?style=for-the-badge" alt="GitHub Forks">
+  <img src="https://img.shields.io/github/issues/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester?style=for-the-badge" alt="GitHub Issues">
+  <img src="https://img.shields.io/github/license/Gurkha-Technology-Open-Source/Nepal-College-Email-Harvester?style=for-the-badge" alt="License">
 </p>
 
 ---
@@ -73,7 +73,7 @@ Make sure you have Node.js and npm installed on your machine.
 
 2. **Clone the Fork**
    ```sh
-   git clone https://github.com/YOUR_USERNAME/nepal-college-email-harvester.git
+   git clone https://github.com/YOUR_USERNAME/Nepal-College-Email-Harvester.git
    ```
 
 3. **Navigate to the Project Directory**
@@ -141,6 +141,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 This project is initiated and actively maintained by **Gurkha Technology**. We are a software development company based in Nepal, passionate about open-source and building innovative solutions.
 
-<a href="https://gurkhatechnology.com/" target="_blank">
-  <img src="https://gurkhatechnology.com/wp-content/uploads/2024/01/Gurkha-Technology-Logo-e1706185237848.png" alt="Gurkha Technology" width="200">
+<a href="https://gurkhatech.com/" target="_blank">
+  <img src="https://gurkhatech.com/wp-content/uploads/2025/01/GT-logo-wtih-icon.svg" alt="Gurkha Technology" width="200">
 </a>
