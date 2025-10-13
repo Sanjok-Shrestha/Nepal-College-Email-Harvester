@@ -29,6 +29,8 @@ The **Nepal College Email Harvester** is a web-based application designed to sim
 
 This project was built with the goal of creating a simple, user-friendly interface to a powerful backend, making data collection effortless. It's an open-source initiative, perfect for contributors looking to participate in **Hacktoberfest**!
 
+This project is an open-source initiative by **Gurkha Technology** and is actively maintained by the community.
+
 ### ✨ Features
 
 - **AI-Powered Search:** Utilizes the Gemini AI model for intelligent and accurate data retrieval.
@@ -132,3 +134,13 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [Google AI](https://ai.google/) for the powerful Gemini model.
 - [Vercel](https://vercel.com/) for hosting the live demo.
 - All the amazing contributors who will help make this project even better!
+
+---
+
+## 🏢 Maintained By
+
+This project is initiated and actively maintained by **Gurkha Technology**. We are a software development company based in Nepal, passionate about open-source and building innovative solutions.
+
+<a href="https://gurkhatechnology.com/" target="_blank">
+  <img src="https://gurkhatechnology.com/wp-content/uploads/2024/01/Gurkha-Technology-Logo-e1706185237848.png" alt="Gurkha Technology" width="200">
+</a>
