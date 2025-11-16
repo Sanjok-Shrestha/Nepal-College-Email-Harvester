@@ -53,47 +53,100 @@ export const harvestEmails = async (province: string, university: string, facult
   };
 
   try {
-    // Call the Gemini API to generate content.
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash', // Use the latest available model.
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.1,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.ARRAY,
-          items: collegeSchema,
-        },
-      },
-      tools: [{googleSearch: {}}], // Enable Google Search for grounding.
-    });
+    // Build params as plain object and cast to any to avoid SDK typing mismatches.
+    const params: any = {
+      model: 'gemini-1.5-flash',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      // put generation options in generationConfig (casted to any so TS won't complain)
+      generationConfig: { temperature: 0.1 },
+      tools: [{ googleSearch: {} }],
+    };
 
-    // Extract the data sources from the response.
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks as GroundingChunk[] || [];
-    // Extract the text response.
-    const textResponse = response.text.trim();
-    
-    // If the response is empty, return an empty array.
+    // Cast call params/response to `any` to allow accessing different SDK shapes without TS errors.
+    const response = await ai.models.generateContent(params);
+    const resAny = response as any;
+
+    // safe extraction of grounding/sources across SDK shapes (use `any` to avoid type errors)
+    const sources =
+      (resAny?.candidates?.[0]?.groundingMetadata?.groundingChunks ||
+        resAny?.candidates?.[0]?.grounding?.groundingChunks ||
+        resAny?.groundingMetadata?.groundingChunks ||
+        resAny?.groundingChunks) as GroundingChunk[] || [];
+
+    // robust text extraction across multiple SDK shapes
+    const extractText = (r: any): string => {
+      if (!r) return '';
+      if (typeof r.text === 'string' && r.text.trim()) return r.text.trim();
+      if (typeof r.outputText === 'string' && r.outputText.trim()) return r.outputText.trim();
+
+      const candidate = r.candidates?.[0] ?? r.outputs?.[0] ?? null;
+      if (!candidate) return '';
+
+      const content = candidate.content ?? candidate.message?.content ?? candidate;
+      if (Array.isArray(content)) {
+        const parts = content
+          .map((p: any) => (typeof p?.text === 'string' ? p.text : typeof p === 'string' ? p : ''))
+          .filter(Boolean);
+        return parts.join('\n').trim();
+      }
+      if (typeof content === 'string' && content.trim()) return content.trim();
+      if (typeof candidate.text === 'string' && candidate.text.trim()) return candidate.text.trim();
+      return '';
+    };
+
+    const textResponse = extractText(resAny);
     if (!textResponse) {
       return { colleges: [], sources };
     }
-    
-    // Parse the JSON response.
-    const parsedData = JSON.parse(textResponse);
 
-    // Ensure the parsed data is an array and return it.
-    if (Array.isArray(parsedData)) {
-      return { colleges: parsedData as College[], sources };
-    } else {
-      throw new Error('Unexpected data format received from API.');
+    // safe parse: try direct parse, then try to extract first JSON array substring
+    let parsedData: any = null;
+    try {
+      parsedData = JSON.parse(textResponse);
+    } catch {
+      const first = textResponse.indexOf('[');
+      const last = textResponse.lastIndexOf(']');
+      if (first !== -1 && last !== -1 && last > first) {
+        try {
+          parsedData = JSON.parse(textResponse.slice(first, last + 1));
+        } catch {
+          parsedData = null;
+        }
+      }
     }
-  } catch (error) {
+
+    // if parsing failed, try structured outputs from SDK (use `any` accesses)
+    if (!Array.isArray(parsedData)) {
+      const structured =
+        resAny?.candidates?.[0]?.structuredOutput ??
+        resAny?.candidates?.[0]?.json ??
+        resAny?.outputs?.[0]?.structuredOutput;
+      if (Array.isArray(structured)) {
+        parsedData = structured;
+      }
+    }
+
+    if (!Array.isArray(parsedData)) {
+      throw new Error('Unexpected data format received from API. Could not parse JSON array from the model output.');
+    }
+
+    // sanitize and return
+    const sanitized: College[] = parsedData
+      .map((item: any) => {
+        const name = typeof item?.name === 'string' ? item.name.trim() : '';
+        let emails: string[] = Array.isArray(item?.emails) ? item.emails.filter((e: any) => typeof e === 'string').map((s: string) => s.trim()) : [];
+        emails = Array.from(new Set(emails)).slice(0, 2);
+        return { name, emails };
+      })
+      .filter((c: College) => c.name);
+
+    return { colleges: sanitized, sources };
+  } catch (error: any) {
     console.error('Error fetching data from Gemini API:', error);
-    // Handle specific API key errors.
-    if (error instanceof Error && error.message.includes('API key not valid')) {
-        throw new Error('Your Gemini API key is not valid. Please check and try again.');
+    const msg = (error && error.message) ? error.message : String(error);
+    if (msg.toLowerCase().includes('api key') && msg.toLowerCase().includes('invalid')) {
+      throw new Error('Your Gemini API key is not valid. Please check and try again.');
     }
-    // Throw a generic error for other issues.
-    throw new Error('Failed to fetch data from Gemini API. Check your API key, the prompt, and the console for more details.');
+    throw new Error('Failed to fetch data from Gemini API. Check your API key, network, and console for more details.');
   }
 };

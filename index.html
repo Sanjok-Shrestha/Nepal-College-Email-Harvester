@@ -1,25 +1,41 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF--8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nepal College Email Harvester</title>
+    <meta name="description" content="Nepal College Email Harvester — find official college contact emails by province, university and faculty." />
+    <meta name="theme-color" content="#111827" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Performance hint for the CDN used by importmap -->
+    <link rel="preconnect" href="https://aistudiocdn.com" crossorigin />
+
+    <!-- Tailwind runtime (keeps current behavior) -->
     <script src="https://cdn.tailwindcss.com"></script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.24.0"
-  }
-}
-</script>
-</head>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.24.0"
+      }
+    }
+    </script>
+
+    <title>Nepal College Email Harvester</title>
+  </head>
   <body class="bg-gray-100 dark:bg-gray-900">
-    <div id="root"></div>
+    <div id="root" role="main" aria-live="polite"></div>
+
+    <noscript>
+      <div class="p-4 text-sm text-red-700 bg-red-50">
+        This application requires JavaScript. Please enable JavaScript in your browser.
+      </div>
+    </noscript>
+
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

@@ -1,3 +1,13 @@
+/// <reference types="vite/client" />
+
+declare interface ImportMetaEnv {
+  readonly VITE_GEMINI_API_KEY?: string;
+  // add other VITE_... env vars here as needed
+}
+
+declare interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
 
 // Import necessary React hooks and components, type definitions, and services.
 import React, { useState, useCallback, useEffect } from 'react';
@@ -119,7 +129,7 @@ const App: React.FC = () => {
 
     try {
       // Use the provided API key or fallback to an environment variable.
-      const finalApiKey = debouncedApiKey.trim() || import.meta.env.VITE_GEMINI_API_KEY;
+      const finalApiKey = debouncedApiKey.trim() || (import.meta.env?.VITE_GEMINI_API_KEY ?? '');
       if (!finalApiKey) {
           throw new Error('API Key is required. Please enter one or ensure it is set as an environment variable.');
       }

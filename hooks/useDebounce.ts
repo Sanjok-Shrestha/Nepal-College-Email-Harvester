@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * A custom hook to debounce a value.
@@ -10,23 +9,27 @@ import { useState, useEffect } from 'react';
 export function useDebounce<T>(value: T, delay: number): T {
   // State and setters for debounced value
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  // Ref to avoid setting state on unmounted component
+  const mountedRef = useRef(true);
 
-  useEffect(
-    () => {
-      // Update debounced value after delay
-      const handler = setTimeout(() => {
+  useEffect(() => {
+    mountedRef.current = true;
+    // Ensure non-negative delay
+    const effectiveDelay = Math.max(0, delay);
+    const handler: ReturnType<typeof setTimeout> = setTimeout(() => {
+      if (mountedRef.current) {
         setDebouncedValue(value);
-      }, delay);
+      }
+    }, effectiveDelay);
 
-      // Cancel the timeout if value changes (also on delay change or unmount)
-      // This is how we prevent debounced value from updating if value is changed ...
-      // .. within the delay period. Timeout gets cleared and restarted.
-      return () => {
-        clearTimeout(handler);
-      };
-    },
-    [value, delay] // Only re-call effect if value or delay changes
-  );
+    // Cancel the timeout if value changes (also on delay change or unmount)
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(handler);
+    };
+  }, [value, delay]); // Only re-call effect if value or delay changes
 
   return debouncedValue;
 }
+
+export default useDebounce;
