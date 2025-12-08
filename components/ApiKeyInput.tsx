@@ -16,11 +16,33 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, setApiKey }) => {
   }, [status]);
 
   const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(apiKey);
-      setStatus('Copied');
-    } catch {
-      setStatus('Copy failed');
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try {
+        await navigator.clipboard.writeText(apiKey);
+        setStatus('Copied');
+      } catch {
+        setStatus('Copy failed');
+      }
+    } else {
+      // Fallback for non-secure contexts or older browsers
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = apiKey;
+        textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page in MS Edge.
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (successful) {
+          setStatus('Copied');
+        } else {
+          setStatus('Copy failed');
+        }
+      } catch {
+        setStatus('Copy failed');
+      }
     }
   };
 
