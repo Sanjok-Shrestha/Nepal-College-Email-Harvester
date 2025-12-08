@@ -15,6 +15,11 @@ export function useDebounce<T>(value: T, delay: number): T {
   useEffect(() => {
     mountedRef.current = true;
     // Ensure non-negative delay
+    if (delay < 0) {
+      console.warn(
+        `[useDebounce] Received negative delay (${delay}). This is likely a programming error. Treating delay as 0.`
+      );
+    }
     const effectiveDelay = Math.max(0, delay);
     const handler: ReturnType<typeof setTimeout> = setTimeout(() => {
       if (mountedRef.current) {
