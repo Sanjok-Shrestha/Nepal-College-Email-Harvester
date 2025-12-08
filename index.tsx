@@ -32,8 +32,7 @@ render(App);
 // Optional Hot Module Replacement support (Vite)
 if (import.meta && (import.meta as any).hot) {
   (import.meta as any).hot.accept('./App', (module: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const NextApp = require('./App').default;
+    const NextApp = module.default;
     render(NextApp);
   });
 }
