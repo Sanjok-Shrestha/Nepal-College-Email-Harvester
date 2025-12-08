@@ -67,7 +67,7 @@ export function useTheme(): [Theme, () => void] {
         mq.addEventListener('change', handler as EventListener);
       } else {
         // Type coercion for legacy TS types
-        (mq as any).addListener(handler);
+        (mq as MediaQueryList & { addListener?: (handler: any) => void }).addListener(handler);
       }
 
       return () => {
