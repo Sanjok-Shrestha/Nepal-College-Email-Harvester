@@ -134,8 +134,17 @@ export const harvestEmails = async (province: string, university: string, facult
     const sanitized: College[] = parsedData
       .map((item: any) => {
         const name = typeof item?.name === 'string' ? item.name.trim() : '';
-        let emails: string[] = Array.isArray(item?.emails) ? item.emails.filter((e: any) => typeof e === 'string').map((s: string) => s.trim()) : [];
-        emails = Array.from(new Set(emails)).slice(0, 2);
+        let emails: string[] = [];
+        if (Array.isArray(item?.emails)) {
+          // Step 1: Filter to only strings
+          const stringEmails = item.emails.filter((e: any) => typeof e === 'string');
+          // Step 2: Trim whitespace
+          const trimmedEmails = stringEmails.map((s: string) => s.trim());
+          // Step 3: Deduplicate
+          const uniqueEmails = Array.from(new Set(trimmedEmails));
+          // Step 4: Limit to two emails
+          emails = uniqueEmails.slice(0, 2);
+        }
         return { name, emails };
       })
       .filter((c: College) => c.name);
