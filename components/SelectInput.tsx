@@ -20,10 +20,15 @@ interface SelectInputProps {
  * - slight UX/accessibility improvements
  * - wrapped in forwardRef + memo to avoid unnecessary re-renders and allow refs
  */
+
+// Module-level sanitize utility function
+function sanitize(s: string): string {
+  return s.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-_]/g, '').toLowerCase();
+}
+
 const SelectInput = forwardRef<HTMLSelectElement, SelectInputProps>(
   ({ label, value, onChange, options, placeholder = 'Select an option', id, disabled = false, className = '', required = false }, ref) => {
     const reactId = useId();
-    const sanitize = (s: string) => s.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-_]/g, '').toLowerCase();
     const selectId = useMemo(() => id || `${sanitize(label)}-${reactId}`, [id, label, reactId]);
 
     return (
