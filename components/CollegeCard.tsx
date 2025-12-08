@@ -75,8 +75,8 @@ const CollegeCard: React.FC<CollegeCardProps> = ({ college }) => {
         <h3 className="font-bold text-lg text-indigo-800 dark:text-indigo-300 mb-4">{college.name}</h3>
         <div className="space-y-3">
           {college.emails && college.emails.length > 0 ? (
-            college.emails.map((email) => (
-              <div key={email} className="flex items-center justify-between group">
+            college.emails.map((email, index) => (
+              <div key={`${index}-${email}`} className="flex items-center justify-between group">
                 <a
                   href={`mailto:${email}`}
                   className="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 break-all transition-colors flex items-center space-x-2"
